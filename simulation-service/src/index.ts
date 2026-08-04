@@ -178,10 +178,10 @@ async function start(): Promise<void> {
     // Initialize engine
     await initializeEngine()
 
-    // Start server
-    app.listen(serverConfig.port, () => {
+    // Start server — bind to 0.0.0.0 so container orchestrators (Render, Docker, etc.) can reach it
+    app.listen(serverConfig.port, '0.0.0.0', () => {
       console.log(
-        `[Server] Listening on http://localhost:${serverConfig.port}`
+        `[Server] Listening on http://0.0.0.0:${serverConfig.port}`
       )
       console.log('[Server] Ready to accept commands')
       console.log('[Server] POST /simulation/start - Start the simulation')
