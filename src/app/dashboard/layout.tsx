@@ -34,8 +34,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Close mobile sidebar on route change
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- sync drawer to navigation
-    if (mobileOpen) setMobileOpen(false)
-  }, [pathname, mobileOpen])
+    setMobileOpen(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname])
 
   // Redirect to login if not authenticated
   useEffect(() => {
