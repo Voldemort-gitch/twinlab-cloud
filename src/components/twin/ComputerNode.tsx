@@ -55,7 +55,7 @@ const ComputerNode = memo(function ComputerNode({
       transition={{ type: 'spring', stiffness: 260, damping: 24 }}
       whileHover={{ scale: scale * 1.05, zIndex: 10 }}
       whileTap={{ scale: scale * 0.96 }}
-      className={`group relative w-36 origin-center cursor-pointer rounded-xl border p-3 text-left transition-colors duration-200 ${statusStyles[status]} ${
+      className={`group relative w-28 sm:w-36 origin-center cursor-pointer rounded-xl border p-3 text-left transition-colors duration-200 ${statusStyles[status]} ${
         selected ? 'ring-2 ring-accent z-10' : ''
       }`}
       title={`${computer.name} - ${getStatusLabel(status)}`}

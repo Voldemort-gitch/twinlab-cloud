@@ -82,7 +82,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="p-5 border-b border-brand-dark-border/60">
-        <Link href="/dashboard" className="flex items-center gap-3 group">
+        <Link href="/dashboard" className="flex items-center gap-3 group" onClick={() => { setMobileOpen(false); setSidebarOpen(true) }}>
           <motion.div
             whileHover={{ scale: 1.05, rotate: 3 }}
             transition={springGentle}
@@ -120,6 +120,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <motion.div key={item.href} variants={{ hidden: { opacity: 0, x: -10 }, show: { opacity: 1, x: 0 } }}>
               <Link
                 href={item.href}
+                onClick={() => setMobileOpen(false)}
                 className={`relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                   active
                     ? 'text-white'
@@ -181,20 +182,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </button>
         </div>
 
-        {/* Collapse toggle */}
+        {/* Collapse toggle - desktop only */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-brand-dark-text-subtle hover:text-brand-dark-text hover:bg-brand-dark-surface-hover/70 transition-colors"
+          className="w-full hidden lg:flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-brand-dark-text-subtle hover:text-brand-dark-text hover:bg-brand-dark-surface-hover/70 transition-colors"
         >
           <ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${sidebarOpen ? '' : 'rotate-180'}`} />
-          {sidebarOpen && <span className="text-xs">{sidebarOpen ? 'Collapse' : ''}</span>}
+          {sidebarOpen && <span className="text-xs">Collapse</span>}
         </button>
       </div>
     </div>
   )
 
   return (
-    <div className="flex min-h-screen bg-mesh text-brand-dark-text relative overflow-hidden">
+    <div className="flex min-h-screen bg-mesh text-brand-dark-text relative">
       {/* Floating orbs */}
       <div className="orb w-72 h-72 top-[-8%] left-[-5%]" style={{ background: 'rgba(143,99,247,0.35)' }} />
       <div className="orb w-96 h-96 bottom-[-15%] right-[-8%]" style={{ background: 'rgba(167,139,250,0.22)' }} />
@@ -219,32 +220,38 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </aside>
       )}
 
+      {/* Mobile sidebar overlay */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            key="mobile-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMobileOpen(false)}
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
       {/* Mobile sidebar */}
       <AnimatePresence>
         {mobileOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
-            />
-            <motion.aside
-              initial={{ x: -280 }}
-              animate={{ x: 0 }}
-              exit={{ x: -280 }}
-              transition={springGentle}
-              className="fixed left-0 top-0 z-50 h-screen w-64 bg-brand-dark-surface lg:hidden"
-            >
-              {SidebarContent}
-            </motion.aside>
-          </>
+          <motion.aside
+            key="mobile-sidebar"
+            initial={{ x: -280 }}
+            animate={{ x: 0 }}
+            exit={{ x: -280 }}
+            transition={springGentle}
+            className="fixed left-0 top-0 z-50 h-screen w-64 bg-brand-dark-surface lg:hidden"
+          >
+            {SidebarContent}
+          </motion.aside>
         )}
       </AnimatePresence>
 
       {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0 relative z-10">
+      <div className="flex-1 flex flex-col min-w-0 relative z-10 overflow-hidden">
         {/* Header */}
         <header className="sticky top-0 z-30 glass border-b border-brand-dark-border/60">
           <div className="flex items-center justify-between px-4 sm:px-6 py-3.5">

@@ -59,11 +59,11 @@ export default function ComputerDetailDrawer({ computer, metric, onClose }: Comp
 
       {/* Drawer */}
       <motion.div
-        initial={{ x: 420, opacity: 0.5 }}
-        animate={{ x: 0, opacity: 1 }}
-        exit={{ x: 420, opacity: 0 }}
+      initial={{ x: '100%', opacity: 0.5 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: '100%', opacity: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 32 }}
-        className="relative w-full max-w-md h-full bg-brand-dark-glass-strong backdrop-blur-glass border-l border-white/10 shadow-2xl overflow-y-auto"
+        className="relative w-full sm:max-w-md h-full bg-brand-dark-glass-strong backdrop-blur-glass border-l border-white/10 shadow-2xl overflow-y-auto"
         role="dialog"
         aria-modal="true"
         aria-label={`${computer.name} details`}

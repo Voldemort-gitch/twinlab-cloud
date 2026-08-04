@@ -1,6 +1,10 @@
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+
+const MOBILE_BREAKPOINT = 768
+const DESKTOP_MIN_NODE_PX = 144
+const MOBILE_MIN_NODE_PX = 100
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 import { Computer, Lab, ComputerStatus } from '@/types'
@@ -27,11 +31,18 @@ export default function DigitalTwinPage() {
   const [filterStatus, setFilterStatus] = useState<ComputerStatus | 'all'>('all')
   const [zoom, setZoom] = useState(1)
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'live' | 'offline'>('connecting')
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0)
   const selectedComputerRef = useRef<Computer | null>(null)
 
   useEffect(() => {
     selectedComputerRef.current = selectedComputer
   }, [selectedComputer])
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Load labs on mount
   useEffect(() => {
@@ -130,15 +141,26 @@ export default function DigitalTwinPage() {
     })
   }, [computers, searchQuery, filterStatus])
 
-  const layout = useMemo(() => {
+  const isMobile = windowWidth < MOBILE_BREAKPOINT
+  const effectiveLayout = useMemo(() => {
     const meta = labs.find((l) => l.id === activeLabId)?.layout_metadata as
       | { rows?: number; columns?: number }
       | undefined
-    return {
+    const base = {
       rows: meta?.rows ?? 4,
       columns: meta?.columns ?? 6,
     }
-  }, [labs, activeLabId])
+    if (isMobile) {
+      // Fit within screen with 100px nodes + padding
+      const maxCols = Math.max(2, Math.min(base.columns, Math.floor((windowWidth - 120) / MOBILE_MIN_NODE_PX)))
+      const maxRows = Math.max(2, Math.min(base.rows, Math.floor((windowWidth - 120) / MOBILE_MIN_NODE_PX)))
+      return { columns: maxCols, rows: maxRows }
+    }
+    return base
+  }, [labs, activeLabId, isMobile, windowWidth])
+
+  const gridNodeSize = isMobile ? MOBILE_MIN_NODE_PX : DESKTOP_MIN_NODE_PX
+  const gridPositionDivisor = isMobile ? 160 : 220
 
   const counts = useMemo(() => {
     return {
@@ -287,15 +309,15 @@ export default function DigitalTwinPage() {
             className="min-h-[480px]"
             style={{
               display: 'grid',
-              gridTemplateColumns: `repeat(${layout.columns}, minmax(144px, 1fr))`,
-              gridTemplateRows: `repeat(${layout.rows}, minmax(144px, 1fr))`,
+              gridTemplateColumns: `repeat(${effectiveLayout.columns}, minmax(${gridNodeSize}px, 1fr))`,
+              gridTemplateRows: `repeat(${effectiveLayout.rows}, minmax(${gridNodeSize}px, 1fr))`,
               gap: '1rem',
               padding: '1.5rem',
             }}
           >
             {filteredComputers.map((computer) => {
-              const col = Math.min(Math.floor(computer.position_x / 220), layout.columns - 1)
-              const row = Math.min(Math.floor(computer.position_y / 180), layout.rows - 1)
+              const col = Math.min(Math.floor(computer.position_x / gridPositionDivisor), effectiveLayout.columns - 1)
+              const row = Math.min(Math.floor(computer.position_y / 140), effectiveLayout.rows - 1)
               return (
                 <div
                   key={computer.id}
@@ -339,7 +361,7 @@ export default function DigitalTwinPage() {
           <div>
             <p className="text-sm text-accent font-medium">Online nodes pulse — this view updates live via Supabase Realtime.</p>
             <p className="text-xs text-brand-dark-text-muted mt-0.5">
-              {computers.length} computers · {layout.rows}×{layout.columns} layout
+              {computers.length} computers · {effectiveLayout.rows}×{effectiveLayout.columns} layout
               {searchQuery || filterStatus !== 'all' ? ` · filtered to ${filteredComputers.length}` : ''}
             </p>
           </div>
