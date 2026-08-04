@@ -1,0 +1,33 @@
+{
+  "name": "twinlab-simulation-service",
+  "version": "1.0.0",
+  "description": "Simulation service for TwinLab digital twin platform",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "simulation:start": "tsx src/index.ts start",
+    "simulation:stop": "tsx src/index.ts stop",
+    "simulation:pause": "tsx src/index.ts pause",
+    "simulation:resume": "tsx src/index.ts resume"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.4",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.5.0",
+    "tsx": "^4.23.5",
+    "typescript": "^5.1.6"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true
+  }
+}

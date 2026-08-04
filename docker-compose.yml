@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_SIMULATION_SERVICE_URL: ${NEXT_PUBLIC_SIMULATION_SERVICE_URL:-http://simulation:3001}
+        NEXT_PUBLIC_SIMULATION_SERVICE_TOKEN: ${NEXT_PUBLIC_SIMULATION_SERVICE_TOKEN}
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - simulation
+    restart: unless-stopped
+
+  simulation:
+    build:
+      context: ./simulation-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - SIM_API_TOKEN=${SIM_API_TOKEN}
+    restart: unless-stopped
