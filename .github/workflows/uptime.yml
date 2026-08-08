@@ -1,0 +1,37 @@
+name: Uptime Monitor
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Vercel frontend
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://twinlab-cloud.vercel.app)
+          echo "Frontend status: $STATUS"
+          if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 400 ]; then
+            echo "::error::Frontend returned HTTP $STATUS"
+            exit 1
+          fi
+
+      - name: Check Render sim service
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://twinlab-cloud.onrender.com/health)
+          echo "Sim service status: $STATUS"
+          if [ "$STATUS" -ne 200 ]; then
+            echo "::error::Sim service returned HTTP $STATUS"
+            exit 1
+          fi
+
+      - name: Check frontend body
+        run: |
+          BODY=$(curl -s --max-time 30 https://twinlab-cloud.vercel.app)
+          if [ -z "$BODY" ]; then
+            echo "::error::Frontend returned empty body"
+            exit 1
+          fi
+          echo "Frontend responded with content"
